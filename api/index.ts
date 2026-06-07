@@ -10,10 +10,15 @@ const app = express();
 app.use(express.json());
 
 // Подключение к базе данных Supabase
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
-});
+let pool: Pool;
+try {
+  pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
+  });
+} catch (e) {
+  console.error("Ошибка при создании пула:", e);
+}
 
 const JWT_SECRET = process.env.JWT_SECRET || 'issyk-kul-secret-2026';
 
