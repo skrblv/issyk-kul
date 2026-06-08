@@ -24,11 +24,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     if (token) {
-      fetch('/api/auth/me', {
+      // ПРАВИЛЬНО: используем /api/auth/me для проверки токена
+      const API_URL = import.meta.env.VITE_API_URL || '';
+      
+      fetch(`${API_URL}/api/auth/me`, {
         headers: { Authorization: `Bearer ${token}` }
       })
-        .then(res => res.json())
+        .then(res => {
+          if (!res.ok) throw new Error('Token invalid');
+          return res.json();
+        })
         .then(data => {
+          // В вашем server.ts ответ приходит в виде { user: { id, name... } }
           if (data.user) {
             setUser(data.user);
           } else {
@@ -41,6 +48,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     }
   }, [token]);
+
 
   const login = (newToken: string, newUser: User) => {
     localStorage.setItem('token', newToken);

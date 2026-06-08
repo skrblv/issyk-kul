@@ -27,6 +27,9 @@ export default function ResortDetails() {
   const navigate = useNavigate();
   const { user, token } = useAuth();
   
+  // Ссылка на ваш бэкенд (Render)
+  const API_URL = import.meta.env.VITE_API_URL || '';
+  
   const [resort, setResort] = useState<Resort | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
@@ -43,9 +46,10 @@ export default function ResortDetails() {
   const [reviewStatus, setReviewStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
   useEffect(() => {
+    // ИСПРАВЛЕНО: Запросы идут на API_URL
     Promise.all([
-      fetch(`/api/resorts/${id}`).then(res => res.json()),
-      fetch(`/api/resorts/${id}/reviews`).then(res => res.json())
+      fetch(`${API_URL}/api/resorts/${id}`).then(res => res.json()),
+      fetch(`${API_URL}/api/resorts/${id}/reviews`).then(res => res.json())
     ])
     .then(([resortData, reviewsData]) => {
       if (resortData.error) throw new Error();
@@ -54,7 +58,7 @@ export default function ResortDetails() {
       setLoading(false);
     })
     .catch(() => setLoading(false));
-  }, [id]);
+  }, [id, API_URL]);
 
   const handleBooking = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,7 +69,8 @@ export default function ResortDetails() {
     
     setBookingStatus('loading');
     try {
-      const res = await fetch('/api/bookings', {
+      // ИСПРАВЛЕНО: Запрос на API_URL
+      const res = await fetch(`${API_URL}/api/bookings`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -90,7 +95,8 @@ export default function ResortDetails() {
     
     setReviewStatus('loading');
     try {
-      const res = await fetch('/api/reviews', {
+      // ИСПРАВЛЕНО: Запрос на API_URL
+      const res = await fetch(`${API_URL}/api/reviews`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -102,7 +108,7 @@ export default function ResortDetails() {
       if (!res.ok) throw new Error('Ошибка отправки отзыва');
 
       // Refresh reviews
-      const newReviews = await fetch(`/api/resorts/${id}/reviews`).then(res => res.json());
+      const newReviews = await fetch(`${API_URL}/api/resorts/${id}/reviews`).then(res => res.json());
       setReviews(newReviews);
       setComment('');
       setRating(5);
@@ -113,6 +119,7 @@ export default function ResortDetails() {
       setTimeout(() => setReviewStatus('idle'), 3000);
     }
   };
+
 
   if (loading) {
     return (

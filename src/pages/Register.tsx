@@ -10,12 +10,16 @@ export default function Register() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
+  // Ссылка на ваш бэкенд (Render)
+  const API_URL = import.meta.env.VITE_API_URL || '';
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
     
     try {
-      const res = await fetch('/api/auth/register', {
+      // ИСПРАВЛЕНО: Добавлен API_URL
+      const res = await fetch(`${API_URL}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password })
@@ -23,7 +27,7 @@ export default function Register() {
       
       const data = await res.json();
       
-      if (!res.ok) throw new Error(data.error);
+      if (!res.ok) throw new Error(data.error || 'Ошибка регистрации');
       
       login(data.token, data.user);
       navigate('/');
@@ -96,3 +100,15 @@ export default function Register() {
     </div>
   );
 }
+```
+
+**Последний важный совет:** 
+Поскольку теперь фронтенд и бэкенд на разных доменах, в `server.ts` на Render обязательно должен быть настроен `cors()`. Убедись, что в твоем `server.ts` есть строка `app.use(cors());`. Если возникнет ошибка в консоли браузера `Access-Control-Allow-Origin`, это значит, что Render блокирует запрос от Vercel. 
+
+Если это случится, поправь `cors` вот так:
+```typescript
+app.use(cors({
+  origin: 'https://ВАШ-САЙТ-НА-VERCEL.vercel.app', // Укажи точный адрес фронтенда
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
+}));

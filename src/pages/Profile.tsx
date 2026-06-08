@@ -24,6 +24,9 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Ссылка на ваш бэкенд (Render)
+  const API_URL = import.meta.env.VITE_API_URL || '';
+
   useEffect(() => {
     if (!user) {
       navigate('/login');
@@ -32,7 +35,8 @@ export default function Profile() {
 
     const fetchBookings = async () => {
       try {
-        const res = await fetch('/api/bookings/me', {
+        // ИСПРАВЛЕНО: Добавлен API_URL
+        const res = await fetch(`${API_URL}/api/bookings/me`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         if (!res.ok) throw new Error('Ошибка загрузки бронирований');

@@ -42,6 +42,9 @@ export default function Admin() {
     "bookings",
   );
 
+  // Ссылка на ваш бэкенд (Render)
+  const API_URL = import.meta.env.VITE_API_URL || '';
+
   const [resorts, setResorts] = useState<Resort[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
@@ -65,7 +68,11 @@ export default function Admin() {
 
   const fetchResorts = async (query = searchQuery) => {
     try {
-      const url = query ? `/api/resorts?search=${encodeURIComponent(query)}` : '/api/resorts';
+      // ИСПРАВЛЕНО: Добавлен API_URL
+      const url = query 
+        ? `${API_URL}/api/resorts?search=${encodeURIComponent(query)}` 
+        : `${API_URL}/api/resorts`;
+      
       const res = await fetch(url);
       if (!res.ok) throw new Error("Ошибка загрузки пансионатов");
       const data = await res.json();
@@ -96,7 +103,8 @@ export default function Admin() {
 
   const fetchBookings = async () => {
     try {
-      const res = await fetch("/api/bookings", {
+      // ИСПРАВЛЕНО: Добавлен API_URL
+      const res = await fetch(`${API_URL}/api/bookings`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Ошибка загрузки бронирований");
@@ -112,7 +120,8 @@ export default function Admin() {
     e.preventDefault();
     setIsSubmitting(true);
     try {
-      const res = await fetch("/api/resorts", {
+      // ИСПРАВЛЕНО: Добавлен API_URL
+      const res = await fetch(`${API_URL}/api/resorts`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -149,7 +158,8 @@ export default function Admin() {
   const confirmDeleteResort = async () => {
     if (resortToDelete === null) return;
     try {
-      const res = await fetch(`/api/resorts/${resortToDelete}`, {
+      // ИСПРАВЛЕНО: Добавлен API_URL
+      const res = await fetch(`${API_URL}/api/resorts/${resortToDelete}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -166,7 +176,8 @@ export default function Admin() {
 
   const handleUpdateBookingStatus = async (id: number, status: string) => {
     try {
-      const res = await fetch(`/api/bookings/${id}/status`, {
+      // ИСПРАВЛЕНО: Добавлен API_URL
+      const res = await fetch(`${API_URL}/api/bookings/${id}/status`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -484,9 +495,10 @@ export default function Admin() {
                 </div>
                 <button
                   type="submit"
-                  className="w-full bg-sky-700 text-white font-medium py-3 rounded-xl hover:bg-sky-800 transition-colors mt-4 shadow-sm"
+                  disabled={isSubmitting}
+                  className="w-full bg-sky-700 text-white font-medium py-3 rounded-xl hover:bg-sky-800 transition-colors mt-4 shadow-sm disabled:opacity-50"
                 >
-                  Сохранить
+                  {isSubmitting ? "Сохранение..." : "Сохранить"}
                 </button>
               </form>
             </div>

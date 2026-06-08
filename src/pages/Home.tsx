@@ -23,6 +23,9 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   
+  // Ссылка на ваш бэкенд (Render)
+  const API_URL = import.meta.env.VITE_API_URL || '';
+
   // Filters state
   const [showFilters, setShowFilters] = useState(false);
   const [minPrice, setMinPrice] = useState('');
@@ -41,7 +44,9 @@ export default function Home() {
       if (amenities.length > 0) params.append('amenities', amenities.join(','));
       if (sort !== 'default') params.append('sort', sort);
 
-      const url = `/api/resorts${params.toString() ? '?' + params.toString() : ''}`;
+      // ИСПРАВЛЕНО: Добавлен API_URL для запроса на Render
+      const url = `${API_URL}/api/resorts${params.toString() ? '?' + params.toString() : ''}`;
+      
       const res = await fetch(url);
       if (!res.ok) throw new Error('Ошибка при загрузке данных');
       const data = await res.json();

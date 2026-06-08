@@ -9,12 +9,16 @@ export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
 
+  // Ссылка на ваш бэкенд (Render)
+  const API_URL = import.meta.env.VITE_API_URL || '';
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setError('');
     
     try {
-      const res = await fetch('/api/auth/login', {
+      // ИСПРАВЛЕНО: Добавлен API_URL
+      const res = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
@@ -22,7 +26,7 @@ export default function Login() {
       
       const data = await res.json();
       
-      if (!res.ok) throw new Error(data.error);
+      if (!res.ok) throw new Error(data.error || 'Ошибка входа');
       
       login(data.token, data.user);
       navigate('/');
